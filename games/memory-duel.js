@@ -2,7 +2,7 @@
 // Both sides build the same deck from a shared seed and apply the same
 // numbered moves in order, so the boards always agree. Moves are sent
 // reliably (queued and retried), since a lost flip would break the game.
-import { P, seeded, text, rr, blob, beep } from './common.js?v=5';
+import { P, seeded, text, rr, blob, beep } from './common.js';
 
 const W = 480, H = 560, CS = 100, GAP = 12, OX = 22, OY = 110;
 const COLS = ['#f590b9', '#7fb8f0', '#f5c94a', '#6fd3a0', '#ffa47a', '#b79be3', '#6ccfd0', '#ff8fb0'];

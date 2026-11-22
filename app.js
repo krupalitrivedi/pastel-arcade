@@ -1,7 +1,7 @@
 // Pixel Party: find nearby players over Offline Protocol and play together.
-import { Mesh } from './net.js?v=5';
-import { MemoryDuel } from './games/memory-duel.js?v=5';
-import { PaddleDuel } from './games/paddle-duel.js?v=5';
+import { Mesh } from './net.js';
+import { MemoryDuel } from './games/memory-duel.js';
+import { PaddleDuel } from './games/paddle-duel.js';
 
 const GAMES = {
   memory: { Game: MemoryDuel, icon: '🃏', label: 'memory' },
@@ -21,6 +21,37 @@ const short = (a) => (a ? `${a.slice(0, 9)}…${a.slice(-4)}` : '');
 
 const me = { name: store.get('name', ''), color: store.get('color', COLORS[Math.floor(Math.random() * COLORS.length)]) };
 const mesh = new Mesh({ appId: 'pixel-party', profile });
+
+// ---------------- Works offline (service worker) ----------------
+// After one visit with internet, sw.js keeps the whole site on this device.
+// A new version waits until the person taps "update" (never mid-game).
+let nodeStarted = false;
+function showNet() { $('nonet-pill').hidden = navigator.onLine; }
+addEventListener('online', showNet);
+addEventListener('offline', showNet);
+showNet();
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  navigator.serviceWorker.addEventListener('controllerchange', async () => {
+    // a new build took over: stop this tab's node cleanly, then load the new build
+    if (nodeStarted) await mesh.node?.stop().catch(() => {});
+    location.reload();
+  }, { once: true });
+  navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
+    const offer = () => { $('update-btn').hidden = !(reg.waiting && navigator.serviceWorker.controller); };
+    const watch = () => reg.installing?.addEventListener('statechange', () => { offer(); markReady(); });
+    offer();
+    watch();
+    reg.addEventListener('updatefound', watch);
+    $('update-btn').onclick = () => {
+      if (current && !confirm('Updating ends the game you are in. Update now?')) return;
+      $('update-btn').disabled = true;
+      reg.waiting?.postMessage('activate');
+    };
+    const markReady = () => { if (reg.active) $('offline-pill').hidden = false; };
+    markReady();
+    navigator.serviceWorker.ready.then(markReady);
+  }).catch(() => { /* not available: the site still works online */ });
+}
 
 // ---------------- Setup ----------------
 $('name').value = me.name;
@@ -46,6 +77,7 @@ $('go').onclick = async () => {
   try {
     if (!window.isSecureContext) throw new Error('this page must be opened over https:// or localhost');
     await mesh.start(me);
+    nodeStarted = true;
     enterLobby();
   } catch (err) {
     $('go').disabled = false;

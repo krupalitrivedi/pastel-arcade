@@ -6,11 +6,13 @@
   <title>Pixel Party</title>
   <meta name="description" content="Find players nearby and play tiny pastel games together, no internet needed. Powered by Offline Protocol.">
   <meta name="theme-color" content="#ffb3d1">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icon-180.png">
   <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&family=Pixelify+Sans:wght@400;700&family=Rubik+Bubbles&family=Shrikhand&family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="sparkles" aria-hidden="true">
@@ -22,6 +24,11 @@
     <header class="hero">
       <h1><span class="h-pixel">PIXEL</span><span class="h-party">party</span></h1>
       <p class="tagline">♥ find players nearby ♥ play together ♥ no internet needed ♥</p>
+      <div class="pills">
+        <span id="offline-pill" class="pill" hidden>✦ saved on this device · works offline</span>
+        <span id="nonet-pill" class="pill nonet" hidden>no internet right now · that's okay ♥</span>
+        <button id="update-btn" class="pill update" type="button" hidden>✦ new version ready · tap to update</button>
+      </div>
     </header>
 
     <!-- 1. Who are you? -->
@@ -97,7 +104,7 @@
 
         <p class="small hint">testing on one computer? <button id="second-tab" class="linkish" type="button">open a 2nd player tab ↗</button></p>
       </div>
-      <div class="statusbar"><span id="lobby-status">♥ looking for players…</span><span>offline protocol · encrypted</span></div>
+      <div class="statusbar"><span id="lobby-status">♥ looking for players…</span><span class="net-status">offline protocol · encrypted</span></div>
     </section>
 
     <!-- 3. Playing -->
@@ -145,6 +152,6 @@
 
   <script src="vendor/qr/qrcode.js"></script>
   <script src="vendor/qr/jsQR.js"></script>
-  <script type="module" src="app.js?v=5"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

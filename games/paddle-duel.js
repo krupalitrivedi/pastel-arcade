@@ -2,7 +2,7 @@
 // The host runs the ball and sends the whole state ~20 times a second as
 // "ephemeral" messages (sent once, never retried: a newer one replaces it).
 // The guest only sends its paddle position. The guest smooths what it gets.
-import { P, text, beep } from './common.js?v=5';
+import { P, text, beep } from './common.js';
 
 const W = 600, H = 400, R = 7, PH = 72, RATE = 1 / 20, WIN = 7;
 
