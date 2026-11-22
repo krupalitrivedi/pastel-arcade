@@ -101,6 +101,97 @@ function enterLobby() {
     else if (state === 'disconnected') $('link-status').textContent = 'connection is unstable… waiting for it to recover';
   });
   renderPeers();
+  if (JOIN_ROOM) joinParty(JOIN_ROOM);
+  else if (IS_HOST_MACHINE) startHosting();
+}
+
+// ---------------- One-scan joining (party host: `python tools/serve.py --https`) ----------------
+// The computer running serve.py shows one QR code. A phone scans it with its camera app,
+// opens Pixel Party from that computer, and the two pages swap their WebRTC codes through
+// the server's tiny /signal/ relay, so the computer never has to scan anything back.
+const ID_OK = /^[A-Za-z0-9_-]{8,40}$/;
+const JOIN_ROOM = ID_OK.test(params.get('join') || '') ? params.get('join') : null;
+const IS_HOST_MACHINE = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+if (JOIN_ROOM) $('join-banner').hidden = false;
+
+async function relayInfo() {
+  try {
+    const r = await fetch('signal/info', { cache: 'no-store' });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+
+let hostRoom = null;
+async function startHosting() {
+  const info = await relayInfo();
+  if (!info?.https || !info.ips?.length) return; // not running as a party host: nothing to show
+  hostRoom = store.get('hostRoom', null);
+  if (!ID_OK.test(hostRoom || '')) { hostRoom = rid() + rid(); store.set('hostRoom', hostRoom); }
+  await fetch(`signal/${hostRoom}/open`, { method: 'POST' }).catch(() => {});
+  const urls = info.ips.map((ip) => `https://${ip}:${info.httpsPort}/?join=${hostRoom}`);
+  showQR($('host-qr'), urls[0]);
+  $('host-url').textContent = urls.join('  ·  ');
+  $('host-status').textContent = 'waiting for phones… ✦';
+  $('host-panel').hidden = false;
+  answerLoop();
+}
+
+async function answerLoop() {
+  const answered = new Set();
+  let joined = 0;
+  for (;;) {
+    await sleep(1000);
+    let list = [];
+    try {
+      const r = await fetch(`signal/${hostRoom}/pending`, { cache: 'no-store' });
+      if (r.status === 404) { await fetch(`signal/${hostRoom}/open`, { method: 'POST' }); continue; } // server restarted
+      if (!r.ok) continue;
+      list = await r.json();
+    } catch { continue; } // server briefly unreachable
+    for (const { ticket, offer } of list) {
+      if (answered.has(ticket)) continue;
+      answered.add(ticket);
+      try {
+        const ans = await mesh.rtc.answer(offer);
+        await fetch(`signal/${hostRoom}/${ticket}/answer`, { method: 'POST', body: ans.code });
+        joined++;
+        $('host-status').textContent = `✦ ${joined} device${joined === 1 ? '' : 's'} joined · more can scan anytime`;
+      } catch (e) {
+        $('host-status').textContent = `a phone couldn't join: ${e.message || e}`;
+      }
+    }
+  }
+}
+
+async function joinParty(room) {
+  const say = (t) => { $('join-status').hidden = false; $('join-status').textContent = t; };
+  // the code in the address is a key to this party: take it out of the address bar
+  history.replaceState(null, '', location.pathname + (profile !== 'player' ? `?profile=${encodeURIComponent(profile)}` : ''));
+  say('joining the party… ✦');
+  try {
+    const offer = await mesh.rtc.offer();
+    const r = await fetch(`signal/${room}/join`, { method: 'POST', body: offer.code });
+    if (r.status === 404) throw new Error('that party is closed. ask the host to open Pixel Party and show the QR code again.');
+    if (!r.ok) throw new Error(`the host said no (${r.status}).`);
+    const { ticket } = await r.json();
+    for (let i = 0; i < 120; i++) {
+      await sleep(1000);
+      const a = await fetch(`signal/${room}/${ticket}/answer`, { cache: 'no-store' });
+      if (a.status === 200) {
+        await offer.accept(await a.text());
+        say('connecting to the host… ♥');
+        mesh.rtc.addEventListener('connection', ({ detail: { state } }) => {
+          if (state === 'connected') say('you\'re in the party! ♥ pick someone below to play');
+        });
+        return;
+      }
+      if (a.status === 404) throw new Error('that join timed out. scan the QR code again.');
+    }
+    throw new Error('the host didn\'t answer. is Pixel Party open on their computer?');
+  } catch (e) {
+    say(`couldn't join: ${e.message || e}`);
+  }
 }
 
 function renderPeers() {

@@ -6,7 +6,7 @@
 // shows "update" and reloads once the person taps it (see app.js).
 //
 // >>> Bump VERSION whenever any file of the site changes, or visitors keep the old build. <<<
-const VERSION = '2026-11-22.1';
+const VERSION = '2026-11-22.2';
 const CACHE = `pixel-party-${VERSION}`;
 const FONTS = 'pixel-party-fonts';
 const FONT_CSS = 'https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&family=Pixelify+Sans:wght@400;700&family=Rubik+Bubbles&family=Shrikhand&family=Silkscreen&family=VT323&display=swap';

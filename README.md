@@ -39,15 +39,24 @@ python tools/serve.py 5180
 
 Then open http://localhost:5180 and use "open a 2nd player tab".
 
-**Phones and tablets on the same Wi-Fi** (no internet needed):
+**Host a party for phones: one scan, no internet** (same Wi-Fi router, or the computer's hotspot):
 
 ```
-python tools/serve.py 5443 --https
+python tools/serve.py --https
 ```
 
-It prints `https://<your-computer's-IP>:5443`; open that on each device. The first time, the browser
-warns that the certificate isn't trusted (it is self-made): choose *Advanced → Proceed*. The certificate
-and key are created in `tools/certs/`, which is git-ignored. Never commit them.
+1. On the computer, open **http://localhost:5180** and go online. The lobby shows **"phones join here"**
+   with one QR code.
+2. Each phone scans it with its **camera app**. Pixel Party opens from the computer, the player picks a
+   name, and they're connected. Nobody scans anything back, and more phones can scan the same code.
+
+How it works: a WebRTC connection needs a code from *both* sides, so `serve.py` includes a tiny relay
+(`/signal/`) that hands the phone's code to the host and the host's answer back. It only passes those
+two codes; the game itself then runs device to device, end-to-end encrypted.
+
+The first time, each phone warns that the certificate isn't trusted (it's self-made): choose
+*Advanced → Proceed*. The certificate is reused afterwards (it needs `openssl`, which comes with Git for
+Windows). It lives in `tools/certs/`, which is git-ignored. Never commit it.
 
 Any static host with https (GitHub Pages, Netlify…) also works.
 

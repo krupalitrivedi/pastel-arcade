@@ -35,6 +35,7 @@
     <section id="setup" class="window">
       <div class="titlebar"><span class="tb-title"><img src="assets/logo.svg" alt="" class="tb-logo">hello.exe</span><span class="tb-btns" aria-hidden="true"><b>–</b><b>□</b><b>×</b></span></div>
       <div class="pane">
+        <p id="join-banner" class="join-banner" hidden>✦ you're joining a party! pick a name and tap go online ♥</p>
         <label class="field">
           <span>your player name</span>
           <input id="name" maxlength="14" autocomplete="off" placeholder="e.g. mochi">
@@ -63,6 +64,15 @@
 
         <h2 class="section-title">players nearby</h2>
         <ul id="peers" class="peers"></ul>
+
+        <section id="host-panel" class="host-panel" hidden>
+          <h2 class="section-title">phones join here ✦</h2>
+          <p class="small">On the same Wi-Fi, scan this with the phone's camera app. That's it: no app, no internet, nothing to scan back.</p>
+          <div id="host-qr" class="qr"></div>
+          <p class="addr center" id="host-url"></p>
+          <p id="host-status" class="status center"></p>
+        </section>
+        <p id="join-status" class="status join-status" hidden></p>
 
         <details class="connect">
           <summary>♥ connect another device (same Wi-Fi)</summary>
