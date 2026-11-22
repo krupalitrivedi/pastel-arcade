@@ -46,6 +46,8 @@ body::after {
 .center { text-align: center; }
 .join-status, .join-banner { margin: 14px 0 0; padding: 8px 12px; background: var(--butter); border: 2px solid #fff; border-radius: 12px; font-size: 20px; }
 .join-banner { margin: 0 0 16px; }
+.host-hint { margin: 16px 0 0; padding: 10px 12px; background: var(--blue); border: 2px solid #fff; border-radius: 12px; }
+.host-hint code { font-family: var(--f-tiny); font-size: 11px; background: #fff; padding: 1px 5px; border-radius: 4px; }
 .pill.update { background: var(--pink); border-color: var(--rose2); cursor: pointer; animation: breathe 2s ease-in-out infinite; }
 
 /* windows */

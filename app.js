@@ -102,7 +102,8 @@ function enterLobby() {
   });
   renderPeers();
   if (JOIN_ROOM) joinParty(JOIN_ROOM);
-  else if (IS_HOST_MACHINE) startHosting();
+  else if (IS_HOST_MACHINE || !location.port) startHosting(); // localhost host, or a hosted site like Vercel
+  else hostHint('✦ joining from a phone? scan the QR code shown on the host computer\'s Pixel Party lobby.');
 }
 
 // ---------------- One-scan joining (party host: `python tools/serve.py --https`) ----------------
@@ -122,10 +123,27 @@ async function relayInfo() {
   } catch { return null; }
 }
 
+function hostHint(html) {
+  $('host-hint').innerHTML = html;
+  $('host-hint').hidden = false;
+}
+
 let hostRoom = null;
 async function startHosting() {
   const info = await relayInfo();
-  if (!info?.https || !info.ips?.length) return; // not running as a party host: nothing to show
+  if (!info) {
+    // e.g. the Vercel site: no relay there, so explain where the one-scan QR lives
+    hostHint('✦ <b>one-scan joining for phones:</b> on a computer, run <code>python tools/serve.py --https</code> in the Pixel Party folder, then open <b>http://localhost:5180</b> there. A QR code appears here for phones to scan.');
+    return;
+  }
+  if (!info.https) {
+    hostHint('✦ <b>want a one-scan QR for phones?</b> stop this server and start it again with <code>python tools/serve.py --https</code>, then reload this page.');
+    return;
+  }
+  if (!info.ips?.length) {
+    hostHint('✦ this computer isn\'t on a Wi-Fi network right now, so phones can\'t reach it. connect to Wi-Fi (or turn on its hotspot) and reload.');
+    return;
+  }
   hostRoom = store.get('hostRoom', null);
   if (!ID_OK.test(hostRoom || '')) { hostRoom = rid() + rid(); store.set('hostRoom', hostRoom); }
   await fetch(`signal/${hostRoom}/open`, { method: 'POST' }).catch(() => {});
