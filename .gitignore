@@ -1,0 +1,9 @@
+# local HTTPS certificates and private keys (made by tools/serve.py --https)
+tools/certs/
+*.pem
+*.key
+
+# OS / editor clutter
+__pycache__/
+.DS_Store
+Thumbs.db

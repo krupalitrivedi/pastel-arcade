@@ -1,0 +1,1 @@
+Built from offline-protocol-sdk commit 5f0a5c82815900cbf9c5b72e7faff3e2dd2fb911 (Fri Nov 20 10:45:05 2026 +0530)

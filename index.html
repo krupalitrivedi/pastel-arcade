@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pixel Party</title>
+  <meta name="description" content="Find players nearby and play tiny pastel games together, no internet needed. Powered by Offline Protocol.">
+  <meta name="theme-color" content="#ffb3d1">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@400;700&family=Pixelify+Sans:wght@400;700&family=Rubik+Bubbles&family=Shrikhand&family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+  <div class="sparkles" aria-hidden="true">
+    <i style="left:6%;top:12%">✦</i><i style="left:88%;top:8%">✧</i><i style="left:14%;top:72%">✧</i>
+    <i style="left:92%;top:60%">✦</i><i style="left:50%;top:3%">✦</i><i style="left:72%;top:90%">✧</i>
+  </div>
+
+  <main class="wrap">
+    <header class="hero">
+      <h1><span class="h-pixel">PIXEL</span><span class="h-party">party</span></h1>
+      <p class="tagline">♥ find players nearby ♥ play together ♥ no internet needed ♥</p>
+    </header>
+
+    <!-- 1. Who are you? -->
+    <section id="setup" class="window">
+      <div class="titlebar"><span class="tb-title"><img src="assets/logo.svg" alt="" class="tb-logo">hello.exe</span><span class="tb-btns" aria-hidden="true"><b>–</b><b>□</b><b>×</b></span></div>
+      <div class="pane">
+        <label class="field">
+          <span>your player name</span>
+          <input id="name" maxlength="14" autocomplete="off" placeholder="e.g. mochi">
+        </label>
+        <div class="field">
+          <span>pick your color</span>
+          <div id="swatches" class="swatches"></div>
+        </div>
+        <button id="go" class="big-btn" type="button">♥ go online</button>
+        <p id="boot-status" class="status"></p>
+      </div>
+    </section>
+
+    <!-- 2. Lobby: players nearby -->
+    <section id="lobby" class="window" hidden>
+      <div class="titlebar"><span class="tb-title"><img src="assets/logo.svg" alt="" class="tb-logo">nearby_players.exe</span><span class="tb-btns" aria-hidden="true"><b>–</b><b>□</b><b>×</b></span></div>
+      <div class="pane">
+        <div class="me-card">
+          <span id="me-blob" class="blob"></span>
+          <div>
+            <div class="me-name" id="me-name"></div>
+            <div class="addr" id="me-addr" title="your Offline Protocol address"></div>
+          </div>
+          <span class="online-pill">● online</span>
+        </div>
+
+        <h2 class="section-title">players nearby</h2>
+        <ul id="peers" class="peers"></ul>
+
+        <details class="connect">
+          <summary>♥ connect another device (same Wi-Fi)</summary>
+          <p class="small">Devices swap two codes once, then find each other. Tabs of this browser connect on their own.</p>
+          <div class="row">
+            <button id="make-offer" class="chip" type="button">make a code</button>
+            <button id="have-code" class="chip" type="button">I have a code</button>
+          </div>
+          <div id="offer-panel" hidden>
+            <p class="small">1. Let the other device scan this:</p>
+            <div id="offer-qr" class="qr"></div>
+            <p class="small">2. Then scan the answer it shows:</p>
+            <button id="scan-answer" class="big-btn" type="button">📷 scan their answer</button>
+            <details class="manual"><summary>no camera? copy &amp; paste instead</summary>
+              <textarea id="offer-code" readonly></textarea>
+              <button id="copy-offer" class="chip" type="button">copy</button>
+              <textarea id="answer-in" placeholder="their answer code"></textarea>
+              <button id="accept" class="chip" type="button">connect</button>
+            </details>
+          </div>
+          <div id="answer-panel" hidden>
+            <p class="small">1. Scan the code on the other device:</p>
+            <button id="scan-offer" class="big-btn" type="button">📷 scan their code</button>
+            <details class="manual"><summary>no camera? copy &amp; paste instead</summary>
+              <textarea id="offer-in" placeholder="their code"></textarea>
+              <button id="make-answer" class="chip" type="button">make my answer</button>
+            </details>
+            <div id="answer-out" hidden>
+              <p class="small">2. Show this answer to them to scan:</p>
+              <div id="answer-qr" class="qr"></div>
+              <details class="manual"><summary>copy the answer as text</summary>
+                <textarea id="answer-code" readonly></textarea>
+                <button id="copy-answer" class="chip" type="button">copy</button>
+              </details>
+            </div>
+          </div>
+          <p id="link-status" class="status"></p>
+        </details>
+
+        <p class="small hint">testing on one computer? <button id="second-tab" class="linkish" type="button">open a 2nd player tab ↗</button></p>
+      </div>
+      <div class="statusbar"><span id="lobby-status">♥ looking for players…</span><span>offline protocol · encrypted</span></div>
+    </section>
+
+    <!-- 3. Playing -->
+    <section id="play" hidden>
+      <div class="device">
+        <div class="device-top" aria-hidden="true"><span>♥</span><span class="big">♥</span><span>♥</span></div>
+        <div class="screen">
+          <div class="hud">
+            <button id="leave" class="chip" type="button">◀ leave</button>
+            <h2 id="game-title"></h2>
+            <span id="vs" class="vs"></span>
+          </div>
+          <div class="screen-wrap"><canvas id="canvas" width="480" height="560"></canvas></div>
+        </div>
+        <p id="game-help" class="help"></p>
+      </div>
+    </section>
+
+    <footer>made with html · css · javascript · <a href="https://github.com/Offline-Protocol/offline-protocol-sdk" target="_blank" rel="noopener">Offline Protocol</a> (AGPL-3.0)</footer>
+  </main>
+
+  <!-- pixel dialog for invites / results -->
+  <div id="modal" class="modal" hidden>
+    <div class="dialog window">
+      <div class="titlebar"><span class="tb-title">♥ message!</span><span class="tb-btns" aria-hidden="true"><b>×</b></span></div>
+      <div class="dialog-body">
+        <h3 id="modal-title"></h3>
+        <p id="modal-text"></p>
+        <div id="modal-buttons" class="row center"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- camera scanner -->
+  <div id="scanner" class="modal" hidden>
+    <div class="dialog window">
+      <div class="titlebar"><span class="tb-title">♥ scan_code.exe</span><span class="tb-btns" aria-hidden="true"><b>×</b></span></div>
+      <div class="dialog-body">
+        <video id="scan-video" playsinline muted></video>
+        <p id="scan-status">point the camera at the QR code ✦</p>
+        <button id="scan-cancel" class="ok-btn quiet" type="button">cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/qr/qrcode.js"></script>
+  <script src="vendor/qr/jsQR.js"></script>
+  <script type="module" src="app.js?v=5"></script>
+</body>
+</html>
